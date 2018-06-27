@@ -115,8 +115,7 @@
  * due to the Gibbs phenomenon; the filters are linear phase.
  */
 
-#ifndef _FILTER_H
-#define _FILTER_H
+#pragma once
 
 #define MAX_NUM_FILTER_TAPS 1000
 
@@ -126,6 +125,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <inttypes.h>
+#include <string>
 #include <vector>
 
 enum filterType {LPF, HPF, BPF};
@@ -134,7 +134,6 @@ class Filter{
     private:
         filterType m_filt_t;
         int m_num_taps;
-        int m_error_flag;
         double m_Fs;
         double m_F0;
 
@@ -147,16 +146,15 @@ class Filter{
         std::vector<double> m_sr;
         void designLPF();
         void designHPF();
-
         void designBPF();
 
     public:
         Filter(filterType filt_t, int num_taps, double Fs, double F0, double F1 = 0.0);
         virtual ~Filter() {}
-        double do_sample(double data_sample);
-        void get_taps( double *taps );
-        int write_taps_to_file(const char* filename );
-        int write_freqres_to_file(const char* filename );
-};
 
-#endif
+        double do_sample(double data_sample);
+        const std::vector<double>& get_taps();
+        void write_taps_to_file(const char* filename );
+        void write_freqres_to_file(const char* filename );
+        std::string __str__();
+};
