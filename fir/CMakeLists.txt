@@ -1,7 +1,7 @@
 find_package (SWIG 3.0.12 REQUIRED)
 include (${SWIG_USE_FILE})
 
-add_library(fir SHARED filt.hpp filt.cpp)
+add_library(fir SHARED fir.hpp fir.cpp)
 target_include_directories(fir PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 set_source_files_properties (fir.i PROPERTIES CPLUSPLUS ON)
@@ -10,9 +10,9 @@ function(_create_binding_python)
     set (Python_ADDITIONAL_VERSIONS 2.7)
     find_package (PythonLibs REQUIRED)
     find_package (PythonInterp REQUIRED)
-    swig_add_module (fir_python python fir.i)
-    target_include_directories(_fir_python PUBLIC "${PYTHON_INCLUDE_DIR}")
-    swig_link_libraries (fir_python ${PYTHON_LIBRARY} fir)
+    swig_add_module (fir python fir.i)
+    target_include_directories(_fir  PUBLIC "${PYTHON_INCLUDE_DIR}")
+    swig_link_libraries (fir  ${PYTHON_LIBRARY} fir)
 endfunction()
 
 function(_create_binding_java)

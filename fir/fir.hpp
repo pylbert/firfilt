@@ -48,15 +48,15 @@
  * The arguments to the constructors are as follows:
  *
  *         // For LPF or HPF only
- *         Filter(filterType filt_t, int num_taps, double Fs, double Fx);
+ *         Filter(filterType filt_t, int num_taps, double Fs, double F0);
  *         // For BPF only
- *         Filter(filterType filt_t, int num_taps, double Fs, double Fl, double Fu);
+ *         Filter(filterType filt_t, int num_taps, double Fs, double F0, double F1);
  *
  * filt_t: is LPF, HPF or BPF
  * num_taps: is the number of taps you want the filter to use
  * Fs: is the sampling frequency of the digital data being filtered
- * Fx: is the "transition" frequency for LPF and HPF filters
- * Fl, Fu: are the upper and lower transition frequencies for BPF filters
+ * F0: is the "transition" frequency for LPF and HPF filters
+ * F0, F1: are the upper and lower transition frequencies for BPF filters
  *
  * Once the filter is created, you can start filtering data.  Here
  * is an example for 51 tap lowpass filtering of an audio stream sampled at
@@ -89,14 +89,14 @@
  * out the non-zero value and look at the following table to see the
  * error:
  * -1:  Fs <= 0
- * -2:  Fx <= 0 or Fx >= Fs/2
+ * -2:  F0 <= 0 or F0 >= Fs/2
  * -3:  num_taps <= 0 or num_taps >= MAX_NUM_FILTER_TAPS
  * -4:  memory allocation for the needed arrays failed
  * -5:  an invalid filterType was passed into a constructor
  * -10: Fs <= 0 (BPF case)
- * -11: Fl >= Fu
- * -12: Fl <= 0 || Fl >= Fs/2
- * -13: Fu <= 0 || Fu >= Fs/2
+ * -11: F0 >= F1
+ * -12: F0 <= 0 || F0 >= Fs/2
+ * -13: F1 <= 0 || F1 >= Fs/2
  * -14: num_taps <= 0 or num_taps >= MAX_NUM_FILTER_TAPS (BPF case)
  * -15:  memory allocation for the needed arrays failed (BPF case)
  * -16:  an invalid filterType was passed into a constructor (BPF case)
@@ -126,6 +126,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <inttypes.h>
+#include <vector>
 
 enum filterType {LPF, HPF, BPF};
 
@@ -135,27 +136,27 @@ class Filter{
         int m_num_taps;
         int m_error_flag;
         double m_Fs;
-        double m_Fx;
+        double m_F0;
+
+        /* m_F1 and M_phi are only needed for the bandpass filter case  */
+        double m_F1;
+        double m_phi;
+
         double m_lambda;
-        double *m_taps;
-        double *m_sr;
+        std::vector<double> m_taps;
+        std::vector<double> m_sr;
         void designLPF();
         void designHPF();
 
-        // Only needed for the bandpass filter case
-        double m_Fu, m_phi;
         void designBPF();
 
     public:
-        Filter(filterType filt_t, int num_taps, double Fs, double Fx);
-        Filter(filterType filt_t, int num_taps, double Fs, double Fl, double Fu);
-        ~Filter( );
-        void init();
+        Filter(filterType filt_t, int num_taps, double Fs, double F0, double F1 = 0.0);
+        virtual ~Filter() {}
         double do_sample(double data_sample);
-        int get_error_flag(){return m_error_flag;};
         void get_taps( double *taps );
-        int write_taps_to_file( char* filename );
-        int write_freqres_to_file( char* filename );
+        int write_taps_to_file(const char* filename );
+        int write_freqres_to_file(const char* filename );
 };
 
 #endif

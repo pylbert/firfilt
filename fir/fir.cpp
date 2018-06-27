@@ -37,72 +37,61 @@
  * SUCH DAMAGE.
  */
 
-#include "filt.hpp"
-#define ECODE(x) {m_error_flag = x; return;}
+#include "fir.hpp"
+#include <string>
+#include <sstream>
 
-// Handles LPF and HPF case
-Filter::Filter(filterType filt_t, int num_taps, double Fs, double Fx)
+class toss
 {
-    m_error_flag = 0;
-    m_filt_t = filt_t;
-    m_num_taps = num_taps;
-    m_Fs = Fs;
-    m_Fx = Fx;
-    m_lambda = M_PI * Fx / (Fs/2);
+public:
+    toss() {}
+    virtual ~toss() {}
 
-    if( Fs <= 0 ) ECODE(-1);
-    if( Fx <= 0 || Fx >= Fs/2 ) ECODE(-2);
-    if( m_num_taps <= 0 || m_num_taps > MAX_NUM_FILTER_TAPS ) ECODE(-3);
+    template <typename Type>
+    toss & operator << (const Type & value)
+    {
+        _ss << value;
+        return *this;
+    }
 
-    m_taps = m_sr = NULL;
-    m_taps = (double*)malloc( m_num_taps * sizeof(double) );
-    m_sr = (double*)malloc( m_num_taps * sizeof(double) );
-    if( m_taps == NULL || m_sr == NULL ) ECODE(-4);
+    std::string str() const         { return _ss.str(); }
+    operator std::string () const   { return _ss.str(); }
 
-    init();
+    enum ConvertToString
+    {
+        to_str
+    };
+    std::string operator >> (ConvertToString) { return _ss.str(); }
 
-    if( m_filt_t == LPF ) designLPF();
-    else if( m_filt_t == HPF ) designHPF();
-    else ECODE(-5);
+private:
+    std::stringstream _ss;
 
-    return;
-}
+    toss(const toss &);
+    toss & operator = (toss &);
+};
 
-// Handles BPF case
-Filter::Filter(filterType filt_t, int num_taps, double Fs, double Fl, double Fu)
+// Handles all filter cases LPF, HPF, BPF)
+Filter::Filter(filterType filt_t, int num_taps, double Fs, double F0, double F1) :
+    m_filt_t(filt_t), m_num_taps(num_taps), m_error_flag(0), m_Fs(Fs), m_F0(F0),
+    m_F1(F1), m_phi(M_PI * F1 / (Fs/2)), m_lambda(M_PI * F0/(Fs/2))
 {
-    m_error_flag = 0;
-    m_filt_t = filt_t;
-    m_num_taps = num_taps;
-    m_Fs = Fs;
-    m_Fx = Fl;
-    m_Fu = Fu;
-    m_lambda = M_PI * Fl / (Fs/2);
-    m_phi = M_PI * Fu / (Fs/2);
+    if(Fs <= 0 ) throw std::runtime_error(toss() << "Fs must be > 0");
+    if((F1 != 0.0) && (F0 >= F1 )) throw std::runtime_error(toss() << "F0 must be > F1");
+    if(F0 <= 0) throw std::runtime_error(toss() << "F0 must be > 0");
+    if(F0 >= Fs/2 ) throw std::runtime_error(toss() << "F0 must be < Fs");
+    if((F1 != 0.0) && (F1 <= 0)) throw std::runtime_error(toss() << "F1 must be 0.0 (LPF/HPF), or > 0 for BPF");
+    if((F1 != 0.0) && (F1 >= Fs/2)) throw std::runtime_error(toss() << "F1 must be < Fs/2");
+    if(m_num_taps <= 0 || m_num_taps > MAX_NUM_FILTER_TAPS ) throw std::runtime_error(toss() << "0 < num_taps <= " << MAX_NUM_FILTER_TAPS);
 
-    if( Fs <= 0 ) ECODE(-10);
-    if( Fl >= Fu ) ECODE(-11);
-    if( Fl <= 0 || Fl >= Fs/2 ) ECODE(-12);
-    if( Fu <= 0 || Fu >= Fs/2 ) ECODE(-13);
-    if( m_num_taps <= 0 || m_num_taps > MAX_NUM_FILTER_TAPS ) ECODE(-14);
-
-    m_taps = m_sr = NULL;
-    m_taps = (double*)malloc( m_num_taps * sizeof(double) );
-    m_sr = (double*)malloc( m_num_taps * sizeof(double) );
-    if( m_taps == NULL || m_sr == NULL ) ECODE(-15);
-
-    init();
+    m_taps.resize(m_num_taps);
+    m_sr.resize(m_num_taps);
 
     if( m_filt_t == BPF ) designBPF();
-    else ECODE(-16);
+    else if( m_filt_t == LPF ) designLPF();
+    else if( m_filt_t == HPF ) designHPF();
+    else throw std::runtime_error(toss() << "Valid filter types are {LPF, HPF, BPF}" );
 
     return;
-}
-
-Filter::~Filter()
-{
-    if( m_taps != NULL ) free( m_taps );
-    if( m_sr != NULL ) free( m_sr );
 }
 
 void Filter::designLPF()
@@ -162,7 +151,7 @@ void Filter::get_taps( double *taps )
     return;
 }
 
-int Filter::write_taps_to_file( char *filename )
+int Filter::write_taps_to_file(const char *filename )
 {
     FILE *fd;
 
@@ -184,7 +173,7 @@ int Filter::write_taps_to_file( char *filename )
 
 // Output the magnitude of the frequency response in dB
 #define NP 1000
-int Filter::write_freqres_to_file( char *filename )
+int Filter::write_freqres_to_file(const char *filename )
 {
     FILE *fd;
     int i, k;
@@ -233,17 +222,6 @@ int Filter::write_freqres_to_file( char *filename )
 
     fclose(fd);
     return 0;
-}
-
-void Filter::init()
-{
-    int i;
-
-    if( m_error_flag != 0 ) return;
-
-    for(i = 0; i < m_num_taps; i++) m_sr[i] = 0;
-
-    return;
 }
 
 double Filter::do_sample(double data_sample)

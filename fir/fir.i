@@ -1,5 +1,5 @@
-%module filt
+%module fir
 
-%{#include "filt.hpp"%}
-%include "filt.hpp"
+%{#include "fir.hpp"%}
+%include "fir.hpp"
 
