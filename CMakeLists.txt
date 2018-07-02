@@ -1,7 +1,7 @@
-cmake_minimum_required (VERSION 2.8.11)
-project (swig_cmake_basics)
-
-#set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
+cmake_minimum_required (VERSION 3.0)
+project (firfilt
+    VERSION 1.0.0
+    LANGUAGES CXX)
 
 find_package (PkgConfig REQUIRED)
 

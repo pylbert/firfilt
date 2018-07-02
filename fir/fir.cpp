@@ -40,6 +40,8 @@
 #include "fir.hpp"
 #include <iterator>
 #include <sstream>
+#include <numeric>
+
 
 class toss
 {
@@ -195,6 +197,11 @@ void Filter::write_freqres_to_file(const char *filename )
     }
 
     fclose(fd);
+}
+
+double Filter::gain()
+{
+    return std::accumulate(get_taps().begin(), get_taps().end(), (double)0.0);
 }
 
 double Filter::do_sample(double data_sample)

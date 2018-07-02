@@ -1,22 +1,41 @@
 find_package (SWIG 3.0.12 REQUIRED)
 include (${SWIG_USE_FILE})
 
+# Create fir shared library target
 add_library(fir SHARED fir.hpp fir.cpp)
+# Add the directory for target includes
 target_include_directories(fir PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+# Tie the project version to the shared library name
+set_target_properties(fir PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
+# Install the shared library target
+install(TARGETS fir
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    INCLUDES DESTINATION include)
 
+# Tag the interface file as CXX
 set_source_files_properties (fir.i PROPERTIES CPLUSPLUS ON)
 
+# Function to create python binding
 function(_create_binding_python)
     set (Python_ADDITIONAL_VERSIONS 2.7)
     find_package (PythonLibs REQUIRED)
     find_package (PythonInterp REQUIRED)
     swig_add_module (fir python fir.i)
     target_include_directories(_fir  PUBLIC "${PYTHON_INCLUDE_DIR}")
-    swig_link_libraries (fir  ${PYTHON_LIBRARY} fir)
+    swig_link_libraries (fir ${PYTHON_LIBRARY} fir)
+
+    # Find the python site/dist packages directory
+    execute_process (COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()" OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+    # Install the shared library target and python wrapper
+    install(TARGETS _fir LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES}/${PROJECT_NAME})
+    install(FILES ${swig_extra_generated_files} __init__.py
+        DESTINATION ${PYTHON_SITE_PACKAGES}/${PROJECT_NAME})
 endfunction()
 
+# Function to create JAVA binding
 function(_create_binding_java)
-    # JAVA
     find_package (Java REQUIRED)
     find_package (JNI REQUIRED)
     swig_add_module (fir_java java fir.i)
@@ -24,6 +43,7 @@ function(_create_binding_java)
     swig_link_libraries (fir_java ${JNI_LIBRARIES} fir)
 endfunction()
 
+# Function to create JS binding
 function(_create_binding_js)
 #find_package (Node REQUIRED)
 #set (V8_VERSION_HEX 0x0${V8_VERSION_MAJOR}${V8_VERSION_MINOR}${V8_VERSION_PATCH})
