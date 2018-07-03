@@ -2,13 +2,15 @@ find_package (SWIG 3.0.12 REQUIRED)
 include (${SWIG_USE_FILE})
 
 # Create fir shared library target
-add_library(fir SHARED fir.hpp fir.cpp)
+add_library(libfir SHARED fir.hpp fir.cpp)
+# Since the shared library target name == libfir, no need for a file prefix
+set_target_properties(libfir PROPERTIES PREFIX "")
 # Add the directory for target includes
-target_include_directories(fir PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(libfir PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 # Tie the project version to the shared library name
-set_target_properties(fir PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
+set_target_properties(libfir PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
 # Install the shared library target
-install(TARGETS fir
+install(TARGETS libfir
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     INCLUDES DESTINATION include)
@@ -25,7 +27,7 @@ function(_create_binding_python)
         LANGUAGE python
         SOURCES fir.i)
     target_include_directories(_fir  PUBLIC "${PYTHON_INCLUDE_DIR}")
-    swig_link_libraries (fir ${PYTHON_LIBRARY} fir)
+    swig_link_libraries (fir ${PYTHON_LIBRARY} libfir)
 
     # Find the python site/dist packages directory
     execute_process (COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()" OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -43,7 +45,7 @@ function(_create_binding_java)
     find_package (JNI REQUIRED)
     swig_add_library (fir_java java fir.i)
     target_include_directories(fir_java PUBLIC ${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2} ${JNI_INCLUDE_DIRS})
-    swig_link_libraries (fir_java ${JNI_LIBRARIES} fir)
+    swig_link_libraries (fir_java ${JNI_LIBRARIES} libfir)
 endfunction()
 
 # Function to create JS binding
@@ -63,7 +65,7 @@ function(_create_binding_js)
 #    swig_add_library (fir_javascript LANGUAGE javascript SOURCES fir.i)
 #endif ()
 #target_include_directories(fir_javascript PUBLIC "${NODEJS_INCLUDE_DIRS}")
-#swig_link_libraries (fir_javascript ${NODE_LIBRARIES} fir)
+#swig_link_libraries (fir_javascript ${NODE_LIBRARIES} libfir)
 #set_target_properties (fir_javascript PROPERTIES
 #  COMPILE_FLAGS "-DBUILDING_NODE_EXTENSION -DSWIG_V8_VERSION=${V8_VERSION_HEX} -std=c++11"
 #  PREFIX ""
