@@ -1,9 +1,9 @@
-cmake_minimum_required (VERSION 3.0)
+cmake_minimum_required (VERSION 3.8.2)
 project (firfilt
     VERSION 1.0.0
     LANGUAGES CXX)
 
-find_package (PkgConfig REQUIRED)
+#find_package (PkgConfig REQUIRED)
 
 ## Cmake print all variables
 #get_cmake_property(_variableNames VARIABLES)

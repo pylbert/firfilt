@@ -21,16 +21,19 @@ function(_create_binding_python)
     set (Python_ADDITIONAL_VERSIONS 2.7)
     find_package (PythonLibs REQUIRED)
     find_package (PythonInterp REQUIRED)
-    swig_add_module (fir python fir.i)
+    swig_add_library (fir
+        LANGUAGE python
+        SOURCES fir.i)
     target_include_directories(_fir  PUBLIC "${PYTHON_INCLUDE_DIR}")
     swig_link_libraries (fir ${PYTHON_LIBRARY} fir)
 
     # Find the python site/dist packages directory
     execute_process (COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()" OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+    FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/__init__.py "")
     # Install the shared library target and python wrapper
     install(TARGETS _fir LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES}/${PROJECT_NAME})
-    install(FILES ${swig_extra_generated_files} __init__.py
+    install(FILES ${swig_extra_generated_files} ${CMAKE_CURRENT_BINARY_DIR}/__init__.py
         DESTINATION ${PYTHON_SITE_PACKAGES}/${PROJECT_NAME})
 endfunction()
 
@@ -38,7 +41,7 @@ endfunction()
 function(_create_binding_java)
     find_package (Java REQUIRED)
     find_package (JNI REQUIRED)
-    swig_add_module (fir_java java fir.i)
+    swig_add_library (fir_java java fir.i)
     target_include_directories(fir_java PUBLIC ${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2} ${JNI_INCLUDE_DIRS})
     swig_link_libraries (fir_java ${JNI_LIBRARIES} fir)
 endfunction()
@@ -55,7 +58,7 @@ function(_create_binding_js)
 #
 #set_property(SOURCE fir.i PROPERTY SWIG_FLAGS "-node" "-DV8_VERSION=${V8_VERSION_HEX}")
 #if (CMAKE_VERSION VERSION_LESS "3.8")
-#    swig_add_module (fir_javascript javascript fir.i)
+#    swig_add_library (fir_javascript javascript fir.i)
 #else ()
 #    swig_add_library (fir_javascript LANGUAGE javascript SOURCES fir.i)
 #endif ()
@@ -68,6 +71,6 @@ function(_create_binding_js)
 #)
 endfunction()
 
-_create_binding_java()
-_create_binding_js()
+#_create_binding_java()
+#_create_binding_js()
 _create_binding_python()
