@@ -1,6 +1,9 @@
 find_package (SWIG 3.0.12 REQUIRED)
 include (${SWIG_USE_FILE})
 
+# Don't require __declspec's in source for Windows
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
 # Create fir shared library target
 add_library(libfir SHARED fir.hpp fir.cpp)
 # Since the shared library target name == libfir, no need for a file prefix
