@@ -26,10 +26,9 @@ function(_create_binding_python)
     set (Python_ADDITIONAL_VERSIONS 2.7)
     find_package (PythonLibs REQUIRED)
     find_package (PythonInterp REQUIRED)
-    swig_add_library (fir
-        LANGUAGE python
-        SOURCES fir.i)
-    target_include_directories(_fir  PUBLIC "${PYTHON_INCLUDE_DIR}")
+    swig_add_library (fir TYPE MODULE LANGUAGE python SOURCES fir.i)
+    set(_fir ${SWIG_MODULE_fir_REAL_NAME})
+    target_include_directories(${_fir} PUBLIC "${PYTHON_INCLUDE_DIR}")
     swig_link_libraries (fir ${PYTHON_LIBRARY} libfir)
 
     # Find the python site/dist packages directory
@@ -37,7 +36,7 @@ function(_create_binding_python)
 
     FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/__init__.py "")
     # Install the shared library target and python wrapper
-    install(TARGETS _fir LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES}/${PROJECT_NAME})
+    install(TARGETS ${_fir} LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES}/${PROJECT_NAME})
     install(FILES ${swig_extra_generated_files} ${CMAKE_CURRENT_BINARY_DIR}/__init__.py
         DESTINATION ${PYTHON_SITE_PACKAGES}/${PROJECT_NAME})
 endfunction()
