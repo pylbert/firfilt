@@ -37,6 +37,9 @@
  * SUCH DAMAGE.
  */
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #include "fir.hpp"
 #include <iterator>
 #include <sstream>

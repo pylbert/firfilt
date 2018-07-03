@@ -42,9 +42,7 @@
 #define MAX_NUM_FILTER_TAPS 1000
 
 #include <stdio.h>
-#include <math.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
 #include <inttypes.h>
 #include <string>
