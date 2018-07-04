@@ -41,6 +41,8 @@
 #include <cmath>
 
 #include "fir.hpp"
+#include <fstream>
+#include <iomanip>
 #include <iterator>
 #include <sstream>
 #include <numeric>
@@ -77,7 +79,7 @@ class toss
 
 // Handles all filter cases LPF, HPF, BPF)
 Filter::Filter(filterType filt_t, int num_taps, double Fs, double F0, double F1) :
-    m_filt_t(filt_t), m_num_taps(num_taps), m_Fs(Fs), m_F0(F0),
+    m_filt_t(filt_t), m_Fs(Fs), m_F0(F0),
     m_F1(F1), m_phi(M_PI * F1 / (Fs/2)), m_lambda(M_PI * F0/(Fs/2)),
     m_taps(num_taps), m_sr(num_taps)
 {
@@ -87,7 +89,7 @@ Filter::Filter(filterType filt_t, int num_taps, double Fs, double F0, double F1)
     if(F0 >= Fs/2 ) throw std::runtime_error(toss() << "F0 must be < Fs");
     if((F1 != 0.0) && (F1 <= 0)) throw std::runtime_error(toss() << "F1 must be 0.0 (LPF/HPF), or > 0 for BPF");
     if((F1 != 0.0) && (F1 >= Fs/2)) throw std::runtime_error(toss() << "F1 must be < Fs/2");
-    if(m_num_taps <= 0 || m_num_taps > MAX_NUM_FILTER_TAPS ) throw std::runtime_error(toss() << "0 < num_taps <= " << MAX_NUM_FILTER_TAPS);
+    if(num_taps <= 0 || num_taps > MAX_NUM_FILTER_TAPS ) throw std::runtime_error(toss() << "0 < num_taps <= " << MAX_NUM_FILTER_TAPS);
 
     if( m_filt_t == BPF ) designBPF();
     else if( m_filt_t == LPF ) designLPF();
@@ -99,9 +101,9 @@ Filter::Filter(filterType filt_t, int num_taps, double Fs, double F0, double F1)
 
 void Filter::designLPF()
 {
-    for(int n = 0; n < m_num_taps; n++)
+    for(int n = 0; n < m_taps.size(); n++)
     {
-        double mm = n - (m_num_taps - 1.0) / 2.0;
+        double mm = n - (m_taps.size() - 1.0) / 2.0;
         if( mm == 0.0 ) m_taps[n] = m_lambda / M_PI;
         else m_taps[n] = sin( mm * m_lambda ) / (mm * M_PI);
     }
@@ -111,9 +113,9 @@ void Filter::designLPF()
 
 void Filter::designHPF()
 {
-    for(int n = 0; n < m_num_taps; n++)
+    for(int n = 0; n < m_taps.size(); n++)
     {
-        double mm = n - (m_num_taps - 1.0) / 2.0;
+        double mm = n - (m_taps.size() - 1.0) / 2.0;
         if( mm == 0.0 ) m_taps[n] = 1.0 - m_lambda / M_PI;
         else m_taps[n] = -sin( mm * m_lambda ) / (mm * M_PI);
     }
@@ -123,9 +125,9 @@ void Filter::designHPF()
 
 void Filter::designBPF()
 {
-    for(int n = 0; n < m_num_taps; n++)
+    for(int n = 0; n < m_taps.size(); n++)
     {
-        double mm = n - (m_num_taps - 1.0) / 2.0;
+        double mm = n - (m_taps.size() - 1.0) / 2.0;
         if( mm == 0.0 ) m_taps[n] = (m_phi - m_lambda) / M_PI;
         else m_taps[n] = (   sin( mm * m_phi ) -
                 sin( mm * m_lambda )   ) / (mm * M_PI);
@@ -141,14 +143,12 @@ const std::vector<double>& Filter::get_taps()
 
 void Filter::write_taps_to_file(const char *filename )
 {
-    FILE *fd = fopen(filename, "w");
-    if( fd == NULL ) throw std::runtime_error(toss() << "Failed to open " << filename
-            << " for writing");
-
-    fprintf(fd, "%d\n", m_num_taps);
-    for(int i = 0; i < m_num_taps; i++)
-        fprintf(fd, "%15.6f\n", m_taps[i]);
-    fclose(fd);
+    std::ofstream fd;
+    fd.open(filename);
+    fd << m_taps.size() << std::endl;
+    for (std::vector<double>::const_iterator it = m_taps.begin();
+            it != m_taps.end(); ++it)
+        fd << std::setw(15) << std::setprecision(6) << *it << std::endl;
 }
 
 // Output the magnitude of the frequency response in dB
@@ -169,7 +169,7 @@ void Filter::write_freqres_to_file(const char *filename )
         w = i*dw;
         y_r[i] = 0;
         y_i[i] = 0;
-        for(int k = 0; k < m_num_taps; k++)
+        for(int k = 0; k < m_taps.size(); k++)
         {
             y_r[i] += m_taps[k] * cos(k * w);
             y_i[i] -= m_taps[k] * sin(k * w);
@@ -190,7 +190,8 @@ void Filter::write_freqres_to_file(const char *filename )
     for(int i = 0; i < NP; i++)
     {
         w = i*dw;
-        if( y_mag[i] == 0 ) tmp_d = -100;
+        if( y_mag[i] == 0 )
+            tmp_d = -100;
         else
         {
             tmp_d = 20 * log10( y_mag[i] / mag_max );
@@ -209,13 +210,13 @@ double Filter::gain()
 
 double Filter::do_sample(double data_sample)
 {
-    for(int i = m_num_taps - 1; i >= 1; i--)
+    for(int i = m_taps.size() - 1; i >= 1; i--)
         m_sr[i] = m_sr[i-1];
 
     m_sr[0] = data_sample;
 
     double result = 0;
-    for(int i = 0; i < m_num_taps; i++) result += m_sr[i] * m_taps[i];
+    for(int i = 0; i < m_taps.size(); i++) result += m_sr[i] * m_taps[i];
 
     return result;
 }
@@ -226,7 +227,7 @@ std::string Filter::__str__()
     oss << (m_filt_t == LPF ? "LPF" : m_filt_t == HPF ? "HPF" : "BPF")
         << " Fs: " << m_Fs << (m_filt_t < BPF ? " Fc" : " Fl" ) << ": " << m_F0;
     if (m_filt_t == BPF) oss << " Fh: " << m_F1;
-    oss << " ntaps: " << m_num_taps << std::endl;
+    oss << " ntaps: " << m_taps.size() << std::endl;
     oss << "\ttaps: ";
     std::copy(m_taps.begin(), m_taps.end()-1, std::ostream_iterator<double>(oss, ","));
     oss << m_taps.back() << std::endl;
