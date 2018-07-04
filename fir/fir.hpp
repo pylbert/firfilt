@@ -41,6 +41,7 @@
 
 #define MAX_NUM_FILTER_TAPS 1000
 
+#include <deque>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -177,7 +178,7 @@ class Filter
 
     private:
         filterType m_filt_t;
-        int m_num_taps;
+        double m_gain;
         double m_Fs;
         double m_F0;
 
@@ -187,7 +188,7 @@ class Filter
 
         double m_lambda;
         std::vector<double> m_taps;
-        std::vector<double> m_sr;
+        std::deque<double> m_sr;
         void designLPF();
         void designHPF();
         void designBPF();

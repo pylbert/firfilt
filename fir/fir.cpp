@@ -55,14 +55,14 @@ class toss
         virtual ~toss() {}
 
         template <typename Type>
-        toss & operator << (const Type & value)
-        {
-            _ss << value;
-            return *this;
-        }
+            toss & operator << (const Type & value)
+            {
+                _ss << value;
+                return *this;
+            }
 
-        std::string str() const         { return _ss.str(); }
-        operator std::string () const   { return _ss.str(); }
+        std::string str() const { return _ss.str(); }
+        operator std::string () const { return _ss.str(); }
 
         enum ConvertToString
         {
@@ -79,7 +79,7 @@ class toss
 
 // Handles all filter cases LPF, HPF, BPF)
 Filter::Filter(filterType filt_t, int num_taps, double Fs, double F0, double F1) :
-    m_filt_t(filt_t), m_Fs(Fs), m_F0(F0),
+    m_filt_t(filt_t), m_gain(0.0), m_Fs(Fs), m_F0(F0),
     m_F1(F1), m_phi(M_PI * F1 / (Fs/2)), m_lambda(M_PI * F0/(Fs/2)),
     m_taps(num_taps), m_sr(num_taps)
 {
@@ -96,16 +96,21 @@ Filter::Filter(filterType filt_t, int num_taps, double Fs, double F0, double F1)
     else if( m_filt_t == HPF ) designHPF();
     else throw std::runtime_error(toss() << "Valid filter types are {LPF, HPF, BPF}" );
 
+    /* Calculate gain from the calculated tap coefficients */
+    m_gain = std::accumulate(get_taps().begin(), get_taps().end(), (double)0.0);
+
     return;
 }
 
 void Filter::designLPF()
 {
-    for(int n = 0; n < m_taps.size(); n++)
+    for(size_t n = 0; n < m_taps.size(); n++)
     {
         double mm = n - (m_taps.size() - 1.0) / 2.0;
-        if( mm == 0.0 ) m_taps[n] = m_lambda / M_PI;
-        else m_taps[n] = sin( mm * m_lambda ) / (mm * M_PI);
+        if( mm == 0.0 )
+            m_taps[n] = m_lambda / M_PI;
+        else
+            m_taps[n] = sin( mm * m_lambda ) / (mm * M_PI);
     }
 
     return;
@@ -113,7 +118,7 @@ void Filter::designLPF()
 
 void Filter::designHPF()
 {
-    for(int n = 0; n < m_taps.size(); n++)
+    for(size_t n = 0; n < m_taps.size(); n++)
     {
         double mm = n - (m_taps.size() - 1.0) / 2.0;
         if( mm == 0.0 ) m_taps[n] = 1.0 - m_lambda / M_PI;
@@ -125,12 +130,12 @@ void Filter::designHPF()
 
 void Filter::designBPF()
 {
-    for(int n = 0; n < m_taps.size(); n++)
+    for(size_t n = 0; n < m_taps.size(); n++)
     {
         double mm = n - (m_taps.size() - 1.0) / 2.0;
         if( mm == 0.0 ) m_taps[n] = (m_phi - m_lambda) / M_PI;
-        else m_taps[n] = (   sin( mm * m_phi ) -
-                sin( mm * m_lambda )   ) / (mm * M_PI);
+        else m_taps[n] = ( sin( mm * m_phi ) -
+                sin( mm * m_lambda ) ) / (mm * M_PI);
     }
 
     return;
@@ -148,7 +153,8 @@ void Filter::write_taps_to_file(const char *filename )
     fd << m_taps.size() << std::endl;
     for (std::vector<double>::const_iterator it = m_taps.begin();
             it != m_taps.end(); ++it)
-        fd << std::setw(15) << std::setprecision(6) << *it << std::endl;
+        fd << std::fixed << std::setw(15) << std::setprecision(6)
+            << *it << std::endl;
 }
 
 // Output the magnitude of the frequency response in dB
@@ -169,7 +175,7 @@ void Filter::write_freqres_to_file(const char *filename )
         w = i*dw;
         y_r[i] = 0;
         y_i[i] = 0;
-        for(int k = 0; k < m_taps.size(); k++)
+        for(size_t k = 0; k < m_taps.size(); k++)
         {
             y_r[i] += m_taps[k] * cos(k * w);
             y_i[i] -= m_taps[k] * sin(k * w);
@@ -179,13 +185,15 @@ void Filter::write_freqres_to_file(const char *filename )
     for(int i = 0; i < NP; i++)
     {
         y_mag[i] = sqrt( y_r[i] * y_r[i] + y_i[i] * y_i[i] );
-        if( y_mag[i] > mag_max ) mag_max = y_mag[i];
+        if( y_mag[i] > mag_max )
+            mag_max = y_mag[i];
     }
 
-    if( mag_max <= 0.0 ) throw std::runtime_error(toss() << "invalid mag_max: " << mag_max);
+    if( mag_max <= 0.0 )
+        throw std::runtime_error(toss() << "invalid mag_max: " << mag_max);
 
-    FILE *fd = fopen(filename, "w");
-    if( fd == NULL ) throw std::runtime_error(toss() << "Failed to open " << filename);
+    std::ofstream fd;
+    fd.open(filename);
 
     for(int i = 0; i < NP; i++)
     {
@@ -195,30 +203,30 @@ void Filter::write_freqres_to_file(const char *filename )
         else
         {
             tmp_d = 20 * log10( y_mag[i] / mag_max );
-            if( tmp_d < -100 ) tmp_d = -100;
+            if( tmp_d < -100 )
+                tmp_d = -100;
         }
-        fprintf(fd, "%10.6e %10.6e\n", w * (m_Fs/2)/M_PI, tmp_d);
+        fd << std::fixed << std::setprecision(10)
+            << w * (m_Fs/2)/M_PI << " " << tmp_d << std::endl;
     }
-
-    fclose(fd);
 }
 
 double Filter::gain()
 {
-    return std::accumulate(get_taps().begin(), get_taps().end(), (double)0.0);
+    return m_gain;
 }
 
 double Filter::do_sample(double data_sample)
 {
-    for(int i = m_taps.size() - 1; i >= 1; i--)
-        m_sr[i] = m_sr[i-1];
-
-    m_sr[0] = data_sample;
+    /* Shift on the new sample, pop off an old */
+    m_sr.push_front(data_sample);
+    m_sr.pop_back();
 
     double result = 0;
-    for(int i = 0; i < m_taps.size(); i++) result += m_sr[i] * m_taps[i];
+    for(size_t i = 0; i < m_taps.size(); i++)
+        result += m_sr[i] * m_taps[i];
 
-    return result;
+    return result * 1/m_gain;
 }
 
 std::string Filter::__str__()
@@ -227,6 +235,7 @@ std::string Filter::__str__()
     oss << (m_filt_t == LPF ? "LPF" : m_filt_t == HPF ? "HPF" : "BPF")
         << " Fs: " << m_Fs << (m_filt_t < BPF ? " Fc" : " Fl" ) << ": " << m_F0;
     if (m_filt_t == BPF) oss << " Fh: " << m_F1;
+    oss << " gain: " << m_gain;
     oss << " ntaps: " << m_taps.size() << std::endl;
     oss << "\ttaps: ";
     std::copy(m_taps.begin(), m_taps.end()-1, std::ostream_iterator<double>(oss, ","));
