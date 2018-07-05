@@ -3,7 +3,7 @@ project (firfilt VERSION 1.0.0 LANGUAGES CXX)
 
 # Add the compiler flags for code coverage on Debug builds
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-  include(cmake/modules/CodeCoverage.cmake)
+  include(${PROJECT_SOURCE_DIR}/cmake/modules/CodeCoverage.cmake)
   append_coverage_compiler_flags()
   set(COVERAGE_EXCLUDES '/usr/*' '**tests**' '*build*')
 endif()
