@@ -26,11 +26,8 @@ sudo make -j24 -Cbuild install
 ```
 git clone https://github.com/pylbert/firfilt.git
 cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -Bbuild -H.
+# Note, may require a command shell with admin privileges
 cmake --build build --target install
-```
-or
-```
-sudo make -j24 -Cbuild install
 ```
 
 ## Running the tests
@@ -60,6 +57,6 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 ## Acknowledgments
 
 * Mike Perkins - Cardinal Peak, LLC
-The FIR filter class was designed and written by Mike Perkins.
+The FIR filter class was designed and written by Mike Perkins.  The CMake project and accompanying files were added by Noel Eck.
 
 

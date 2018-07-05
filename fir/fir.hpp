@@ -223,3 +223,20 @@ class Filter_HP : public Filter
          */
         Filter_HP(int num_taps, double Fs, double F0) : Filter(HPF, num_taps, Fs, F0) {}
 };
+
+/**
+ * Helper class for band-pass filter
+ */
+class Filter_BP : public Filter
+{
+    public:
+        /*
+         * Construct a high-pass Filter object.
+         * @param num_taps Target number of filter taps
+         * @param Fs Data sampling frequency
+         * @param F0 Low cutoff frequency
+         * @param F1 High cutoff frequency
+         */
+        Filter_BP(int num_taps, double Fs, double F0, double F1) : Filter(BPF, num_taps, Fs, F0, F1) {}
+};
+

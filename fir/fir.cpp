@@ -46,6 +46,7 @@
 #include <iterator>
 #include <sstream>
 #include <numeric>
+#include <exception>
 
 
 class toss
