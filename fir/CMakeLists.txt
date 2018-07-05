@@ -46,7 +46,11 @@ function(_create_binding_python)
     FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/__init__.py "")
     # Install the shared library target and python wrapper
     install(TARGETS ${_fir} DESTINATION ${PYTHON_SITE_PACKAGES}/${PROJECT_NAME})
-    install(FILES ${swig_extra_generated_files} ${CMAKE_CURRENT_BINARY_DIR}/__init__.py
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/__init__.py
+        DESTINATION ${PYTHON_SITE_PACKAGES}/${PROJECT_NAME})
+    # Some versions of CMake DON'T have the output .py file in a CMake var
+    # so do it manually
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/fir.py
         DESTINATION ${PYTHON_SITE_PACKAGES}/${PROJECT_NAME})
 endfunction()
 
