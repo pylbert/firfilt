@@ -17,6 +17,7 @@ set_target_properties(libfir PROPERTIES PUBLIC_HEADER fir.hpp)
 target_compile_features(libfir PRIVATE cxx_std_11)
 # Install the shared library target
 install(TARGETS libfir
+    RUNTIME DESTINATION lib # Help windows out (not used for LINUX)
     LIBRARY DESTINATION lib
     PUBLIC_HEADER DESTINATION include)
 
