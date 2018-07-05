@@ -5,7 +5,12 @@ include (${SWIG_USE_FILE})
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 # Create fir shared library target
-add_library(libfir SHARED fir.hpp fir.cpp)
+if(WIN32)
+    add_library(libfir STATIC fir.hpp fir.cpp)
+else()
+    add_library(libfir SHARED fir.hpp fir.cpp)
+endif()
+
 # Since the shared library target name == libfir, no need for a file prefix
 set_target_properties(libfir PROPERTIES PREFIX "")
 # Add the directory for target includes
@@ -19,6 +24,7 @@ target_compile_features(libfir PRIVATE cxx_std_11)
 install(TARGETS libfir
     RUNTIME DESTINATION lib # Help windows out (not used for LINUX)
     LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
     PUBLIC_HEADER DESTINATION include)
 
 # Tag the interface file as CXX
