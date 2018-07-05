@@ -84,7 +84,6 @@ std::string bp()
     char result[ MAX_PATH ];
     sep = '\\';
     bp = std::string( result, GetModuleFileName( NULL, result, MAX_PATH ) );
-}
 #else
     char result[ PATH_MAX ];
     ssize_t count = readlink( "/proc/self/exe", result, PATH_MAX );
