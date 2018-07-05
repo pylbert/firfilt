@@ -12,11 +12,13 @@ set_target_properties(libfir PROPERTIES PREFIX "")
 target_include_directories(libfir PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 # Tie the project version to the shared library name
 set_target_properties(libfir PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
+set_target_properties(libfir PROPERTIES PUBLIC_HEADER fir.hpp)
+# Use c++11
+target_compile_features(libfir PRIVATE cxx_std_11)
 # Install the shared library target
 install(TARGETS libfir
-    RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
-    INCLUDES DESTINATION include)
+    PUBLIC_HEADER DESTINATION include)
 
 # Tag the interface file as CXX
 set_source_files_properties (fir.i PROPERTIES CPLUSPLUS ON)
@@ -36,7 +38,7 @@ function(_create_binding_python)
 
     FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/__init__.py "")
     # Install the shared library target and python wrapper
-    install(TARGETS ${_fir} LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES}/${PROJECT_NAME})
+    install(TARGETS ${_fir} DESTINATION ${PYTHON_SITE_PACKAGES}/${PROJECT_NAME})
     install(FILES ${swig_extra_generated_files} ${CMAKE_CURRENT_BINARY_DIR}/__init__.py
         DESTINATION ${PYTHON_SITE_PACKAGES}/${PROJECT_NAME})
 endfunction()
