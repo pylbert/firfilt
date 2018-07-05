@@ -1,20 +1,12 @@
 #include "gtest/gtest.h"
 #include "fir.hpp"
+#include "firfilt_tests.hpp"
 #include <exception>
 #include <string>
 #include <fstream>
 #include <iterator>
 #include <string>
 #include <algorithm>
-
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
-#ifdef __linux
-#include <unistd.h>
-#include <linux/limits.h>
-#endif
 
 class fir_ft : public ::testing::Test {};
 
@@ -74,59 +66,36 @@ bool AreEqual(const std::string& filename0, const std::string& filename1)
             std::istreambuf_iterator<char>(f2.rdbuf()));
 }
 
-
-std::string bp()
-{
-    std::string bp;
-    char sep = '/';
-
-#ifdef _WIN32
-    char result[ MAX_PATH ];
-    sep = '\\';
-    bp = std::string( result, GetModuleFileName( NULL, result, MAX_PATH ) );
-#else
-    char result[ PATH_MAX ];
-    ssize_t count = readlink( "/proc/self/exe", result, PATH_MAX );
-    bp = std::string( result, (count > 0) ? count : 0 );
-#endif
-
-    size_t i = bp.rfind(sep, bp.length());
-    if (i != std::string::npos)
-        return(bp.substr(0, i+1));
-
-    return "";
-}
-
 TEST_F(fir_ft, test_write_taps_to_file)
 {
     Filter filter(LPF, 11, 1000, 10);
-    filter.write_taps_to_file((bp() + "taps.txt").c_str());
-    ASSERT_TRUE(AreEqual(bp() + "taps.txt", bp() + "taps.txt.golden"));
+    filter.write_taps_to_file((CMAKE_CURRENT_BINARY_DIR + "taps.txt").c_str());
+    ASSERT_TRUE(AreEqual(CMAKE_CURRENT_BINARY_DIR + "taps.txt", CMAKE_CURRENT_SOURCE_DIR + "taps.txt"));
 }
 
 TEST_F(fir_ft, test_write_freqres_to_file)
 {
     Filter filter(LPF, 11, 1000, 10);
-    filter.write_freqres_to_file((bp() + "freqresp.txt").c_str());
-    ASSERT_TRUE(AreEqual(bp() + "freqresp.txt", bp() + "freqresp.txt.golden"));
+    filter.write_freqres_to_file((CMAKE_CURRENT_BINARY_DIR + "freqresp.txt").c_str());
+    ASSERT_TRUE(AreEqual(CMAKE_CURRENT_BINARY_DIR + "freqresp.txt", CMAKE_CURRENT_SOURCE_DIR + "freqresp.txt"));
 }
 
 TEST_F(fir_ft, test_filter_str_method)
 {
     Filter filter(LPF, 11, 1000, 10);
-    std::ofstream ofs ((bp() + "lpf.txt").c_str());
+    std::ofstream ofs ((CMAKE_CURRENT_BINARY_DIR + "lpf.txt").c_str());
     ofs << filter.__str__();
     ofs.close();
 
-    ASSERT_TRUE(AreEqual(bp() + "lpf.txt", bp() + "lpf.txt.golden"));
+    ASSERT_TRUE(AreEqual(CMAKE_CURRENT_BINARY_DIR + "lpf.txt", CMAKE_CURRENT_SOURCE_DIR + "lpf.txt"));
 }
 
 TEST_F(fir_ft, test_filter_sin_wave)
 {
     Filter filter(LPF, 51, 1000, 7);
 
-    std::ifstream in((bp() + "Fs1000_1Hz_signal_20Hz_noise.txt").c_str());
-    std::ofstream out ((bp() + "filtered_Fs1000_1Hz_signal_20Hz_noise.txt").c_str());
+    std::ifstream in((CMAKE_CURRENT_SOURCE_DIR + "Fs1000_1Hz_signal_20Hz_noise.txt").c_str());
+    std::ofstream out ((CMAKE_CURRENT_BINARY_DIR + "filtered_Fs1000_1Hz_signal_20Hz_noise.txt").c_str());
     ASSERT_FALSE(in.eof());
 
     out << std::fixed << std::setprecision(8);
@@ -142,6 +111,6 @@ TEST_F(fir_ft, test_filter_sin_wave)
     out.close();
 
     /* Check the filtered data */
-    ASSERT_TRUE(AreEqual(bp() + "filtered_Fs1000_1Hz_signal_20Hz_noise.txt",
-                bp() + "filtered_Fs1000_1Hz_signal_20Hz_noise.txt.golden"));
+    ASSERT_TRUE(AreEqual(CMAKE_CURRENT_BINARY_DIR + "filtered_Fs1000_1Hz_signal_20Hz_noise.txt",
+                CMAKE_CURRENT_SOURCE_DIR + "filtered_Fs1000_1Hz_signal_20Hz_noise.txt"));
 }
