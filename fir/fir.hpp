@@ -136,11 +136,6 @@ class Filter
         Filter(filterType filt_t, int num_taps, double Fs, double F0, double F1 = 0.0);
 
         /**
-         * Default destructor
-         */
-        virtual ~Filter() {}
-
-        /**
          * Filter gain coefficient calculated as the sum of all filter taps
          * @return Filter gain
          */

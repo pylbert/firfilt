@@ -62,20 +62,10 @@ class toss
                 return *this;
             }
 
-        std::string str() const { return _ss.str(); }
         operator std::string () const { return _ss.str(); }
-
-        enum ConvertToString
-        {
-            to_str
-        };
-        std::string operator >> (ConvertToString) { return _ss.str(); }
 
     private:
         std::stringstream _ss;
-
-        toss(const toss &);
-        toss & operator = (toss &);
 };
 
 // Handles all filter cases LPF, HPF, BPF)
@@ -227,7 +217,7 @@ double Filter::do_sample(double data_sample)
     for(size_t i = 0; i < m_taps.size(); i++)
         result += m_sr[i] * m_taps[i];
 
-    return result * 1/m_gain;
+    return result * 1/gain();
 }
 
 std::string Filter::__str__()
@@ -236,7 +226,7 @@ std::string Filter::__str__()
     oss << (m_filt_t == LPF ? "LPF" : m_filt_t == HPF ? "HPF" : "BPF")
         << " Fs: " << m_Fs << (m_filt_t < BPF ? " Fc" : " Fl" ) << ": " << m_F0;
     if (m_filt_t == BPF) oss << " Fh: " << m_F1;
-    oss << " gain: " << m_gain;
+    oss << " gain: " << gain();
     oss << " ntaps: " << m_taps.size() << std::endl;
     oss << "\ttaps: ";
     std::copy(m_taps.begin(), m_taps.end()-1, std::ostream_iterator<double>(oss, ","));
