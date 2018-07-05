@@ -1,0 +1,4 @@
+#include <string>
+
+#define CMAKE_CURRENT_SOURCE_DIR std::string("@CMAKE_CURRENT_SOURCE_DIR@") + "/"
+#define CMAKE_CURRENT_BINARY_DIR std::string("@CMAKE_CURRENT_BINARY_DIR@") + "/"
