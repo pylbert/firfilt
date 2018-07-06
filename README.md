@@ -30,24 +30,34 @@ cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -Bbuild -H.
 cmake --build build --target install
 ```
 
-## Running the tests
+## Googletest Unit Testing
 
-Explain how to run the automated tests for this system
+A collection of unit tests are included which test the filter methods.
 
-### Break down into end to end tests
-
-Explain what these tests test and why
+Building/running the unit tests
 
 ```
-Give an example
+make -j24 -Cbuild test
+```
+or
+```
+cd build
+make test
+```
+or
+```
+cd build
+ctest
 ```
 
-### And coding style tests
+## Code Coverage
 
-Explain what these tests test and why
+The unit tests also provide coverage via gcov/lcov (if installed).
+
+Generating coverage
 
 ```
-Give an example
+make -j24 -Cbuild coverage
 ```
 
 ## License
