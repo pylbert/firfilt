@@ -57,6 +57,6 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 ## Acknowledgments
 
 * Mike Perkins - Cardinal Peak, LLC
-The FIR filter class was designed and written by Mike Perkins.  The CMake project and accompanying files were added by Noel Eck.
+The FIR filter class was designed and written by Mike Perkins.  The CMake project, accompanying files, and some C++ touch-up was done by Noel Eck.
 
 
