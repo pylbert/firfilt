@@ -1,6 +1,3 @@
-find_package (SWIG 3.0.12 REQUIRED)
-include (${SWIG_USE_FILE})
-
 # Don't require __declspec's in source for Windows
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
@@ -99,6 +96,14 @@ function(_create_binding_js)
       PREFIX ""
       SUFFIX ".node")
 endfunction()
+
+# If no SWIG, don't attempt the language bindings
+if (SWIG_FOUND)
+    include (${SWIG_USE_FILE})
+else ()
+    message(STATUS "Install SWIG to enable language bindings")
+    return ()
+endif()
 
 _create_binding_java()
 _create_binding_js()

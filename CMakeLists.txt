@@ -14,6 +14,9 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/modules")
 # Find required package for language bindings up-front since their CMake
 # variables can be used in all subdirectories
 
+# Required for all language bindings
+find_package (SWIG 3.0.12)
+
 # Required for Python module
 set (Python_ADDITIONAL_VERSIONS 2.7)
 find_package (PythonLibs)
