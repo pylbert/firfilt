@@ -1,11 +1,17 @@
 %module fir
 
-%include <std_string.i>
+/* Catch a set of execptions */
+%include catch_exceptions.i
 
+/* Generate basic parameter type documentation */
+%feature("autodoc", "3");
+
+/* The #include directive copies the contents into the wrapper src */
 %{#include "fir.hpp"%}
+/* The %include directive lets SWIG parse the header and expose its methods */
 %include "fir.hpp"
 
-/* BEGIN Python syntax  ------------------------------------------------------- */
+/* BEGIN Python syntax  ----------------------------------------------------- */
 #ifdef SWIGPYTHON
 /* Attach pythons __str__ method to a similar method in C++ */
 %feature("python:slot", "tp_str", functype="reprfunc") Filter::__str__;
