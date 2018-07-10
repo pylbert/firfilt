@@ -44,16 +44,15 @@
 #include <fstream>
 #include <iomanip>
 #include <iterator>
-#include <sstream>
 #include <numeric>
-#include <exception>
+#include <sstream>
+#include <stdexcept>
 
 
 class toss
 {
     public:
         toss() {}
-        virtual ~toss() {}
 
         template <typename Type>
             toss & operator << (const Type & value)

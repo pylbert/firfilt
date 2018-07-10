@@ -42,10 +42,6 @@
 #define MAX_NUM_FILTER_TAPS 1000
 
 #include <deque>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <inttypes.h>
 #include <string>
 #include <vector>
 
@@ -234,4 +230,3 @@ class Filter_BP : public Filter
          */
         Filter_BP(int num_taps, double Fs, double F0, double F1) : Filter(BPF, num_taps, Fs, F0, F1) {}
 };
-

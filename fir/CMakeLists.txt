@@ -19,7 +19,7 @@ target_include_directories(libfir PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 set_target_properties(libfir PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
 set_target_properties(libfir PROPERTIES PUBLIC_HEADER fir.hpp)
 # Use c++11
-target_compile_features(libfir PRIVATE cxx_std_11)
+target_compile_features(libfir PUBLIC cxx_std_11)
 # Install the shared library target
 install(TARGETS libfir
     RUNTIME DESTINATION lib # Help windows out (not used for LINUX)
