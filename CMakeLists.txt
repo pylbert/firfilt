@@ -8,6 +8,9 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   set(COVERAGE_EXCLUDES '/usr/*' '**tests**' '*build*')
 endif()
 
+# Add local CMake modules
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/modules")
+
 # Enable testing prior to adding any subdirectories
 enable_testing()
 

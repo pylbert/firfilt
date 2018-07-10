@@ -4,7 +4,7 @@ include (${SWIG_USE_FILE})
 # Don't require __declspec's in source for Windows
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
-# Create fir shared library target
+# Create fir library target
 if(WIN32)
     add_library(libfir STATIC fir.hpp fir.cpp)
 else()
@@ -33,8 +33,13 @@ set_source_files_properties (fir.i PROPERTIES CPLUSPLUS ON)
 # Function to create python binding
 function(_create_binding_python)
     set (Python_ADDITIONAL_VERSIONS 2.7)
-    find_package (PythonLibs REQUIRED)
-    find_package (PythonInterp REQUIRED)
+    find_package (PythonLibs)
+    find_package (PythonInterp)
+    if (NOT ${PYTHONLIBS_FOUND} OR NOT ${PYTHONINTERP_FOUND})
+        MESSAGE(STATUS "Failed to find Python2.7, skipping python module generation...")
+        return ()
+    endif()
+
     swig_add_library (fir TYPE MODULE LANGUAGE python SOURCES fir.i)
     set(_fir ${SWIG_MODULE_fir_REAL_NAME})
     target_include_directories(${_fir} PUBLIC "${PYTHON_INCLUDE_DIR}")
@@ -56,38 +61,51 @@ endfunction()
 
 # Function to create JAVA binding
 function(_create_binding_java)
-    find_package (Java REQUIRED)
-    find_package (JNI REQUIRED)
-    swig_add_library (fir_java java fir.i)
-    target_include_directories(fir_java PUBLIC ${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2} ${JNI_INCLUDE_DIRS})
-    swig_link_libraries (fir_java ${JNI_LIBRARIES} libfir)
+    find_package (Java)
+    find_package (JNI)
+    if (NOT ${JAVA_FOUND} OR NOT ${JNI_FOUND})
+        MESSAGE(STATUS "Failed to find JDK (with JNI), skipping Java package generation...")
+        return ()
+    endif()
+    # Specify a package name
+    list(APPEND CMAKE_SWIG_FLAGS "-package;firjava")
+    swig_add_library (firjava TYPE MODULE LANGUAGE java SOURCES fir.i)
+    set(_fir ${SWIG_MODULE_firjava_REAL_NAME})
+    target_include_directories(${_fir} PUBLIC ${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2} ${JNI_INCLUDE_DIRS})
+    swig_link_libraries (${_fir} ${JNI_LIBRARIES} libfir)
 endfunction()
 
 # Function to create JS binding
 function(_create_binding_js)
-#find_package (Node REQUIRED)
-#set (V8_VERSION_HEX 0x0${V8_VERSION_MAJOR}${V8_VERSION_MINOR}${V8_VERSION_PATCH})
-#string (LENGTH "${V8_VERSION_HEX}" V8_VERSION_HEX_length)
-#while (V8_VERSION_HEX_length LESS 8)
-#    set (V8_VERSION_HEX "${V8_VERSION_HEX}0")
-#    string (LENGTH "${V8_VERSION_HEX}" V8_VERSION_HEX_length)
-#endwhile ()
-#
-#set_property(SOURCE fir.i PROPERTY SWIG_FLAGS "-node" "-DV8_VERSION=${V8_VERSION_HEX}")
-#if (CMAKE_VERSION VERSION_LESS "3.8")
-#    swig_add_library (fir_javascript javascript fir.i)
-#else ()
-#    swig_add_library (fir_javascript LANGUAGE javascript SOURCES fir.i)
-#endif ()
-#target_include_directories(fir_javascript PUBLIC "${NODEJS_INCLUDE_DIRS}")
-#swig_link_libraries (fir_javascript ${NODE_LIBRARIES} libfir)
-#set_target_properties (fir_javascript PROPERTIES
-#  COMPILE_FLAGS "-DBUILDING_NODE_EXTENSION -DSWIG_V8_VERSION=${V8_VERSION_HEX} -std=c++11"
-#  PREFIX ""
-#  SUFFIX ".node"
-#)
+    find_package (Node)
+    if (NOT ${NODE_FOUND})
+        MESSAGE(STATUS "Failed to find NodeJS, skipping JS module generation...")
+        return ()
+    endif()
+    set (V8_VERSION_HEX 0x0${V8_VERSION_MAJOR}${V8_VERSION_MINOR}${V8_VERSION_PATCH})
+    string (LENGTH "${V8_VERSION_HEX}" V8_VERSION_HEX_length)
+    while (V8_VERSION_HEX_length LESS 8)
+        set (V8_VERSION_HEX "${V8_VERSION_HEX}0")
+        string (LENGTH "${V8_VERSION_HEX}" V8_VERSION_HEX_length)
+    endwhile ()
+
+    # Specify -node flavor and v8 version
+    list(APPEND CMAKE_SWIG_FLAGS "-node;-DV8_VERSION=${V8_VERSION_HEX}")
+    swig_add_library (firjs TYPE MODULE LANGUAGE javascript SOURCES fir.i)
+    set(_fir ${SWIG_MODULE_firjs_REAL_NAME})
+
+    target_include_directories(${_fir} PUBLIC "${NODEJS_INCLUDE_DIRS}")
+    swig_link_libraries (${_fir} ${NODE_LIBRARIES} libfir)
+
+    # Simplify the Node module name
+    set_target_properties(${_fir} PROPERTIES OUTPUT_NAME fir)
+
+    set_target_properties (${_fir} PROPERTIES
+      COMPILE_FLAGS "-DBUILDING_NODE_EXTENSION -DSWIG_V8_VERSION=${V8_VERSION_HEX} "
+      PREFIX ""
+      SUFFIX ".node")
 endfunction()
 
-#_create_binding_java()
-#_create_binding_js()
+_create_binding_java()
+_create_binding_js()
 _create_binding_python()
