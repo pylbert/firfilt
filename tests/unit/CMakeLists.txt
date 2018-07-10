@@ -9,7 +9,7 @@ endif()
 
 # Unit tests
 add_executable(firfilt_tests firfilt_tests.cpp)
-target_link_libraries(firfilt_tests libfir GTest::GTest GTest::Main)
+target_link_libraries(firfilt_tests ${MAIN_LIB_TARGET_NAME} GTest::GTest GTest::Main)
 
 # Helper header file for test collateral
 configure_file(firfilt_tests.hpp.in firfilt_tests.hpp)

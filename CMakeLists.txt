@@ -11,6 +11,24 @@ endif()
 # Add local CMake modules
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/modules")
 
+# Find required package for language bindings up-front since their CMake
+# variables can be used in all subdirectories
+
+# Required for Python module
+set (Python_ADDITIONAL_VERSIONS 2.7)
+find_package (PythonLibs)
+find_package (PythonInterp)
+
+# Required for Java package
+find_package (Java)
+find_package (JNI)
+
+# Required for JS package
+find_package (Node)
+
+# Define the main library TARGET name here as well
+set(MAIN_LIB_TARGET_NAME libfir)
+
 # Enable testing prior to adding any subdirectories
 enable_testing()
 
