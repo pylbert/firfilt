@@ -74,6 +74,23 @@ function(_create_binding_java)
     set(_fir ${SWIG_MODULE_firjava_REAL_NAME})
     target_include_directories(${_fir} PUBLIC ${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2} ${JNI_INCLUDE_DIRS})
     swig_link_libraries (${_fir} ${JNI_LIBRARIES} ${MAIN_LIB_TARGET_NAME})
+
+    # Compile/zip the java package
+    add_custom_command (TARGET ${_fir}
+          POST_BUILD
+          COMMAND cmake -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/firjava
+          COMMAND ${JAVA_COMPILE} *.java -d ${CMAKE_CURRENT_BINARY_DIR} -cp .
+          COMMAND ${JAVA_ARCHIVE} cf firjava.jar firjava
+          COMMENT "Build firjava package")
+
+    install (FILES ${CMAKE_CURRENT_BINARY_DIR}/firjava.jar
+        DESTINATION lib/java
+        COMPONENT ${CMAKE_PROJECT_NAME}-java)
+
+    install(TARGETS ${_fir}
+        RUNTIME DESTINATION lib
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)
 endfunction()
 
 # Function to create JS binding
