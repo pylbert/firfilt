@@ -2,7 +2,9 @@ cmake_minimum_required (VERSION 3.8.2)
 project (firfilt VERSION 1.0.0 LANGUAGES CXX)
 
 # Allow PACKAGENAME_ROOT envars
-cmake_policy(SET CMP0074 NEW)
+if(POLICY CMP0074)
+    cmake_policy(SET CMP0074 NEW)
+endif()
 
 # Add the compiler flags for code coverage on Debug builds
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
