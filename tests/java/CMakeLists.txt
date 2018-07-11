@@ -1,4 +1,4 @@
-if (NOT ${JAVA_FOUND})
+if (NOT ${JAVA_FOUND} OR NOT ${JNI_FOUND})
     return()
 endif()
 
