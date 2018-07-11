@@ -1,5 +1,3 @@
-set(CTEST_OUTPUT_ON_FAILURE 1)
-
 # C++ unit tests
 add_subdirectory (unit)
 

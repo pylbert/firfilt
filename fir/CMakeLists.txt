@@ -42,6 +42,15 @@ function(_create_binding_python)
     # Find the python site/dist packages directory
     execute_process (COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()" OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+    # MSVS generators place the python binary in Release/Debug but the ctest
+    # needs it local to fir.py
+    if (MSVC)
+        add_custom_command(TARGET ${_fir} POST_BUILD
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+            "$<TARGET_FILE:fir>"
+            "${CMAKE_CURRENT_BINARY_DIR}"
+            COMMENT "Copy python binary to ${CMAKE_CURRENT_BINARY_DIR} for ctests")
+    endif()
     FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/__init__.py "")
     # Install the shared library target and python wrapper
     install(TARGETS ${_fir} DESTINATION ${PYTHON_SITE_PACKAGES}/${PROJECT_NAME})
