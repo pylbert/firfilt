@@ -47,7 +47,7 @@ function(_create_binding_python)
     if (MSVC)
         add_custom_command(TARGET ${_fir} POST_BUILD
             COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-            "$<TARGET_FILE:fir>"
+            "$<TARGET_FILE:${_fir}>"
             "${CMAKE_CURRENT_BINARY_DIR}"
             COMMENT "Copy python binary to ${CMAKE_CURRENT_BINARY_DIR} for ctests")
     endif()
