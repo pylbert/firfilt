@@ -103,9 +103,12 @@ TEST_F(fir_ft, test_filter_sin_wave)
     /* Filter the input sin wave with noise, write output to file */
     while(!in.eof())
     {
-        double value;
+        double value = 0;
         in >> value;
-        out << filter.do_sample(value) << "\n";
+
+        /* No errors from this stream ? */
+        if (in.good())
+            out << filter.do_sample(value) << "\n";
     }
 
     out.close();

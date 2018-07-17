@@ -6,4 +6,6 @@ get_property(MAIN_LIB_BUILD_DIR TARGET ${MAIN_LIB_TARGET_NAME} PROPERTY BINARY_D
 
 add_test (NAME test_python COMMAND ${PYTHON_EXECUTABLE}
     ${CMAKE_CURRENT_SOURCE_DIR}/test.py ${MAIN_LIB_BUILD_DIR}
+    ${CMAKE_SOURCE_DIR}/tests/unit/Fs1000_1Hz_signal_20Hz_noise.txt
+    ${CMAKE_SOURCE_DIR}/tests/unit/filtered_Fs1000_1Hz_signal_20Hz_noise.txt
     WORKING_DIRECTORY ${MAIN_LIB_BUILD_DIR})

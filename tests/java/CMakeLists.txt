@@ -14,4 +14,6 @@ add_dependencies(Test firjava)
 add_test (NAME test_java
     COMMAND ${JAVA_RUNTIME} -Djava.library.path=${MAIN_LIB_BUILD_DIR}
     -cp ${MAIN_LIB_BUILD_DIR}/firjava.jar:Test.jar Test
+    ${CMAKE_SOURCE_DIR}/tests/unit/Fs1000_1Hz_signal_20Hz_noise.txt
+    ${CMAKE_SOURCE_DIR}/tests/unit/filtered_Fs1000_1Hz_signal_20Hz_noise.txt
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
