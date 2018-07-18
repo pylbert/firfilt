@@ -7,7 +7,7 @@ def main(filename_raw_in, filename_filtered_out):
 
     filt = fir.Filter_LP(51, 1000, 7)
 
-    fdout = tempfile.NamedTemporaryFile()
+    fdout = tempfile.NamedTemporaryFile(delete = False)
 
     with open(filename_raw_in) as f:
         for line in f:
@@ -21,9 +21,15 @@ def main(filename_raw_in, filename_filtered_out):
     # Compare the generated file with the golden filtered file
     import filecmp
     if not filecmp.cmp(filename_filtered_out, fdout.name):
-        print 'Files not equal'
+        print 'Files not equal: ', filename_filtered_out, fdout.name
         exit(-1)
 
+    # Delete the file on success
+    try:
+        import os
+        os.remove(fdout.name)
+    except OSError:
+        pass
 
 if __name__ == '__main__':
     import sys
@@ -33,6 +39,4 @@ if __name__ == '__main__':
 
     # Add the module file path to path
     sys.path.insert(0, sys.argv[1])
-
-    print sys.argv
     main(sys.argv[2], sys.argv[3])
