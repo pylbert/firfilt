@@ -13,21 +13,25 @@ set JAVA_HOME=
 @rem Use git to determine top-level directory
 FOR /F "tokens=* USEBACKQ" %%F IN (`git rev-parse --show-toplevel`) DO (SET ROOT=%%F)
 
+set cmd_gen=cmake -G %GENERATOR% -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -B%ROOT%/build -H%ROOT%
+set cmd_build=cmake --build %ROOT%/build --config %BUILD_TYPE%
+set cmd_test=ctest -C Release
+
 @rem Print out target commands for reference
 echo.
 echo ================================================================================
 echo === Running the following cmake commands =======================================
 echo ================================================================================
-echo cmake -G %GENERATOR% -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -B%ROOT%/build -H%ROOT%
-echo cmake --build %ROOT%/build --config %BUILD_TYPE%
+echo %cmd_gen%
+echo %cmd_build%
 echo pushd build
-echo ctest -C Release
+echo %cmd_test%
 echo popd
 echo ================================================================================
 echo.
 
-cmake -G %GENERATOR% -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -B%ROOT%/build -H%ROOT%
-cmake --build %ROOT%/build --config %BUILD_TYPE%
+%cmd_gen%
+%cmd_build%
 pushd build
-ctest -C Release
+%cmd_test%
 popd
