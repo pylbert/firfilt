@@ -8,6 +8,9 @@ else()
     add_library(${MAIN_LIB_TARGET_NAME} SHARED fir.hpp fir.cpp)
 endif()
 
+# If Doxygen, build documentation first
+add_dependencies(${MAIN_LIB_TARGET_NAME} documentation)
+
 # Since the shared library target name == libfir, no need for a file prefix
 set_target_properties(${MAIN_LIB_TARGET_NAME} PROPERTIES PREFIX "")
 # Add the directory for target includes

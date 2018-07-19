@@ -48,12 +48,16 @@
 #include <sstream>
 #include <stdexcept>
 
-
+/**
+ * Helper class for stringifying stuff
+ */
 class toss
 {
     public:
-        toss() {}
-
+        /**
+         * Override the insertion operator
+         * @param value Type to log
+         */
         template <typename Type>
             toss & operator << (const Type & value)
             {
@@ -61,6 +65,9 @@ class toss
                 return *this;
             }
 
+        /**
+         * Override the string operator
+         */
         operator std::string () const { return _ss.str(); }
 
     private:

@@ -1,4 +1,4 @@
-/*
+/**
  * FIR filter class, by Mike Perkins
  *
  * a simple C++ class for linear phase FIR filtering
@@ -121,7 +121,7 @@ enum filterType
 class Filter
 {
     public:
-        /*
+        /**
          * Construct a Filter object.
          * @param filt_t Filter type
          * @param num_taps Target number of filter taps
@@ -151,13 +151,13 @@ class Filter
 
         /**
          * Write taps to file
-         * @filename Target filename
+         * @param filename Target filename
          */
         void write_taps_to_file(const char* filename );
 
         /**
          * Write frequency response coefficients to file
-         * @filename Target filename
+         * @param filename Target filename
          */
         void write_freqres_to_file(const char* filename );
 
@@ -191,7 +191,7 @@ class Filter
 class Filter_LP : public Filter
 {
     public:
-        /*
+        /**
          * Construct a low-pass Filter object.
          * @param num_taps Target number of filter taps
          * @param Fs Data sampling frequency
@@ -206,7 +206,7 @@ class Filter_LP : public Filter
 class Filter_HP : public Filter
 {
     public:
-        /*
+        /**
          * Construct a high-pass Filter object.
          * @param num_taps Target number of filter taps
          * @param Fs Data sampling frequency
@@ -221,7 +221,7 @@ class Filter_HP : public Filter
 class Filter_BP : public Filter
 {
     public:
-        /*
+        /**
          * Construct a high-pass Filter object.
          * @param num_taps Target number of filter taps
          * @param Fs Data sampling frequency
