@@ -21,6 +21,10 @@ or
 make -j24 -Cbuild
 sudo make -j24 -Cbuild install
 ```
+or
+```
+scripts/build.sh
+```
 
 #### Windows VS Nmake Makefiles
 ```
@@ -28,6 +32,10 @@ git clone https://github.com/pylbert/firfilt.git
 cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -Bbuild -H.
 # Note, may require a command shell with admin privileges
 cmake --build build --target install
+```
+or
+```
+scripts\build.bat
 ```
 
 ## Googletest Unit Testing
