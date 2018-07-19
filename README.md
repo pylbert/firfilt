@@ -2,6 +2,8 @@
 
 The firfilt project is a cross-platform, light-weight C++ FIR implementation.  The intent is to provide a simplified example of using the CMake build system with SWIG for generating Java, JS, and Python language extensions.
 
+![Filter Example](https://github.com/pylbert/firfilt/blob/master/docs/firfilt.png)
+
 ## Getting Started
 
 ### Prerequisites
