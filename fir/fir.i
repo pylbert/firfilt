@@ -9,8 +9,14 @@
 /* Catch a set of execptions */
 %include catch_exceptions.i
 
+/* Doxygen docs or autodoc? */
+#if defined(SWIGPYTHON) && defined(DOXYGEN_DOCS)
+/* Generate full documentation from Doxygen */
+%include firdocs.i
+#else
 /* Generate basic parameter type documentation */
 %feature("autodoc", "3");
+#endif
 
 /* The #include directive copies the contents into the wrapper src */
 %{#include "fir.hpp"%}

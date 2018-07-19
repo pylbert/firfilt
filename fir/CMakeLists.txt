@@ -9,7 +9,9 @@ else()
 endif()
 
 # If Doxygen, build documentation first
-add_dependencies(${MAIN_LIB_TARGET_NAME} documentation)
+if (Doxygen_FOUND)
+    add_dependencies(${MAIN_LIB_TARGET_NAME} documentation)
+endif()
 
 # Since the shared library target name == libfir, no need for a file prefix
 set_target_properties(${MAIN_LIB_TARGET_NAME} PROPERTIES PREFIX "")
@@ -37,10 +39,25 @@ function(_create_binding_python)
         return ()
     endif()
 
+    if (Doxygen_FOUND)
+        list(APPEND CMAKE_SWIG_FLAGS "-DDOXYGEN_DOCS")
+    endif()
+
     swig_add_library (fir TYPE MODULE LANGUAGE python SOURCES fir.i)
     set(_fir ${SWIG_MODULE_fir_REAL_NAME})
     target_include_directories(${_fir} PUBLIC "${PYTHON_INCLUDE_DIR}")
     swig_link_libraries (fir ${PYTHON_LIBRARY} ${MAIN_LIB_TARGET_NAME})
+
+    # Native python documentation?
+    if (Doxygen_FOUND)
+        add_custom_target(gen_python_doc_file
+            COMMAND ${CMAKE_SOURCE_DIR}/scripts/doxy2swig.py
+            ${CMAKE_BINARY_DIR}/xml/index.xml
+            ${CMAKE_CURRENT_BINARY_DIR}/firdocs.i
+            DEPENDS documentation
+            COMMENT "Generate python documentation file")
+        add_dependencies(${_fir} gen_python_doc_file)
+    endif()
 
     # Find the python site/dist packages directory
     execute_process (COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()" OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
