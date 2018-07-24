@@ -20,8 +20,14 @@ target_include_directories(${MAIN_LIB_TARGET_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE
 # Tie the project version to the shared library name
 set_target_properties(${MAIN_LIB_TARGET_NAME} PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
 set_target_properties(${MAIN_LIB_TARGET_NAME} PROPERTIES PUBLIC_HEADER fir.hpp)
+
 # Use c++11
-target_compile_features(${MAIN_LIB_TARGET_NAME} PUBLIC cxx_std_11)
+set_target_properties(${MAIN_LIB_TARGET_NAME} PROPERTIES
+    CXX_STANDARD 11
+    INTERFACE_COMPILE_FEATURES cxx_std_11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO)
+
 # Install the shared library target
 install(TARGETS ${MAIN_LIB_TARGET_NAME}
     RUNTIME DESTINATION lib # Help windows out (not used for LINUX)
